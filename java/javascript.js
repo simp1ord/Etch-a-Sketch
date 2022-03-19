@@ -6,8 +6,11 @@ const sizeSlider = document.getElementById('gridSize');
 const gridSizeDisplay = document.getElementById('gridSizeText');
 const selectSizeButton = document.getElementById('selectGridSize');
 const colorSelect = document.getElementById('colorSelectValue');
+const mode = [''];
+let opacity = 0.1;
 
 
+//Size Display Default and Varied
 gridSizeDisplay.innerHTML = sizeSlider.value + "x" + sizeSlider.value;
 
 function sizeSelectorDisplay() {
@@ -16,15 +19,23 @@ function sizeSelectorDisplay() {
 
 }
 
-function createGrid () { 
-    
+
+//grid Creation and destruction
+function createGrid () {   
     mainGridSquare.style.gridTemplateColumns = `repeat(${sizeSlider.value}, 1fr)`;
     mainGridSquare.style.gridTemplateRows = `repeat(${sizeSlider.value}, 1fr)`;
     
     for(let i = 0; i < (sizeSlider.value * sizeSlider.value); i++){
         const miniGrid = document.createElement('div');
         miniGrid.classList.add('colorSquares');
-        miniGrid.addEventListener('mouseover', colorGrid(miniGrid));
+        miniGrid.addEventListener('mouseover', () =>{
+                colorGrid(miniGrid, opacity);
+            if (opacity < 1){
+                opacity += 0.1;
+            } else if (opacity = 1){
+                opacity -= 0.9;
+            }
+        });
         mainGridSquare.appendChild(miniGrid);
     }
 }
@@ -36,13 +47,8 @@ function deleteOldGrid(){
 
 }
 
-sizeSlider.addEventListener('input', function(){
-    
-    sizeSelectorDisplay();
 
-});
-
-const mode = [];
+//Color Selection and Mode
 function changeMode (buttonPress) {
 
     if (buttonPress === 'color'){
@@ -57,12 +63,10 @@ function changeMode (buttonPress) {
     }else if (buttonPress === 'erase'){
         mode.pop();
         mode.push('erase');
-    }else {
-
     }
 }
 
-function colorGrid(){
+function colorGrid(miniGrid, shade){
     if (mode[0] === 'color'){
         miniGrid.style.backgroundColor = `${colorSelect.value}`;
     }else if (mode[0] === 'rainbow'){
@@ -70,27 +74,21 @@ function colorGrid(){
         let randomB = Math.floor(Math.random()*256);
         let randomC = Math.floor(Math.random()*256);
         miniGrid.style.backgroundColor = `rgb(${randomA}, ${randomB}, ${randomC})`;
-    //} //else if (newMode === 'greyscale'){
-        //let mode = 'greyscale';
+    } else if (mode[0] === 'greyscale'){
+        miniGrid.style.backgroundColor = `rgba(0,0,0, ${shade})`;
     }else if (mode[0] === 'erase'){
-        miniGrid.style.backgroundColor = 'white';
-    }else{
-
+        miniGrid.style.backgroundColor = '#ecebff';
+    }else if (mode[0] === ''){
+        miniGrid.style.backgroundColor = 'black';
     }
 }
 
 
-
-
-
-
-
-
+//buttons / inputs and changes mode/grid size
 colorSelect.addEventListener("input", function () {
     changeMode ('color');
 
 });
-
 greyScale.addEventListener("click", function () {
     greyScale.style.backgroundColor = "#aebafc";
     changeMode ('greyscale');
@@ -103,26 +101,16 @@ erase.addEventListener("click", function () {
     erase.style.backgroundColor = "#aebafc";
     changeMode ('erase');
 });
+sizeSlider.addEventListener('input', function(){
+    
+    sizeSelectorDisplay();
 
-
-
-
-
-
+});
 selectSizeButton.addEventListener("click", function () {
     selectSizeButton.style.backgroundColor = "#aebafc";
     deleteOldGrid();
     createGrid();
 });
-
-
-
-
-
-
-
-
-
 
 //returns buttons to original color
 greyScale.addEventListener('click', () => setTimeout(function() {
@@ -139,10 +127,7 @@ selectSizeButton.addEventListener('click', () => setTimeout(function() {
 }, 100));
    
 
-
-
-
-
-
-
-
+//create a 16x16 after window load
+window.onload = function(){
+    createGrid();
+}
